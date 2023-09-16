@@ -1,0 +1,84 @@
+import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+
+const ThumbnailDownloader = () => {
+  const [url, setUrl] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+
+  const downloadThumbnail = async () => {
+    try {
+      const response = await fetch(`/api/thumbnail?url=${url}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setThumbnailUrl(data.thumbnailUrl);
+      } else {
+        alert(data.error || 'Thumbnail not found on this page.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  // ... rest of your component code
+const puppeteer = require('puppeteer');
+
+const ThumbnailDownloader = () => {
+  const [url, setUrl] = useState('');
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+
+  const downloadThumbnail = async () => {
+    try {
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.goto(url);
+
+      // Extract the thumbnail URL from the YouTube page
+      const thumbnailUrl = await page.evaluate(() => {
+        const thumbnailElement = document.querySelector('link[itemprop="thumbnailUrl"]');
+        return thumbnailElement ? thumbnailElement.getAttribute('href') : null;
+      });
+
+      if (thumbnailUrl) {
+        setThumbnailUrl(thumbnailUrl);
+      } else {
+        alert('Thumbnail not found on this page.');
+      }
+
+      await browser.close();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (url) {
+      downloadThumbnail();
+    }
+  }, [url]);
+
+  return (
+    <div>
+      <h1>YouTube Thumbnail Downloader</h1>
+      <input
+        type="text"
+        placeholder="Enter YouTube URL"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+      />
+      <button onClick={downloadThumbnail}>Download Thumbnail</button>
+      {thumbnailUrl && (
+        <div>
+          <h2>Thumbnail Image:</h2>
+          <img src={thumbnailUrl} alt="YouTube Thumbnail" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+};
+
+export default ThumbnailDownloader;
